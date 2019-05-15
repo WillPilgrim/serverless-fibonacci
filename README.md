@@ -1,4 +1,7 @@
-# Serverless Node.js Starter
+# Customised Serverless Starter Setup
+This is an example set up demonstrating the use of the serverless framework with tests to implement a synchronous AWS lambda. The demonstration is a simple fibonacci number generator.
+
+## Serverless Node.js Starter
 
 A Serverless starter that adds ES7 syntax, serverless-offline, environment variables, and unit test support. Part of the [Serverless Stack](http://serverless-stack.com) guide.
 
@@ -20,28 +23,28 @@ A Serverless starter that adds ES7 syntax, serverless-offline, environment varia
 
 ---
 
-### Demo
-
-A demo version of this service is hosted on AWS - [`https://z6pv80ao4l.execute-api.us-east-1.amazonaws.com/dev/hello`](https://z6pv80ao4l.execute-api.us-east-1.amazonaws.com/dev/hello)
-
+### Fibonacci function
 And here is the ES7 source behind it
 
 ``` javascript
-export const hello = async (event, context) => {
-  return {
+export const fibonacci = function (event, context, callback) {
+  const data = event.pathParameters;
+  let count = parseInt(data.index);
+  let result = 1;
+  let prev1 = 0;
+  let prev2 = 0;
+  for (let j=0;j<count;j++){
+    prev2 = prev1;
+    prev1 = result;
+    result = prev1 + prev2;
+  }
+  callback(null, {
     statusCode: 200,
     body: JSON.stringify({
-      message: `Go Serverless v1.0! ${(await message({ time: 1, copy: 'Your function executed successfully!'}))}`,
-      input: event,
+      result : result
     }),
-  };
+  });
 };
-
-const message = ({ time, ...rest }) => new Promise((resolve, reject) =>
-  setTimeout(() => {
-    resolve(`${rest.copy} (with a delay)`);
-  }, time * 1000)
-);
 ```
 
 ### Requirements
@@ -67,6 +70,71 @@ Install the Node.js packages
 
 ``` bash
 $ npm install
+```
+### Usage
+
+To run unit tests locally
+
+``` bash
+$ npm test
+```
+
+To run a function on locally. Data.json has the parameter data.
+
+``` bash
+$ serverless invoke local --function fibonacci --path tests\data.json
+```
+
+To simulate API Gateway locally using [serverless-offline](https://github.com/dherault/serverless-offline)
+
+``` bash
+$ serverless offline start
+```
+
+Then test with a browser. For example, use URL http://localhost:3000/fibonacci/12 which should show
+
+``` bash
+{
+"result": 233
+}
+```
+
+We use Jest to run our tests. You can read more about setting up your tests [here](https://facebook.github.io/jest/docs/en/getting-started.html#content).
+
+Deploy your project
+
+``` bash
+$ serverless deploy
+```
+
+Deploy a single function
+
+``` bash
+$ serverless deploy function --function fibonacci
+```
+
+### Asynchronous Demo
+
+A demo version of this service is hosted on AWS - [`https://z6pv80ao4l.execute-api.us-east-1.amazonaws.com/dev/hello`](https://z6pv80ao4l.execute-api.us-east-1.amazonaws.com/dev/hello)
+
+And here is the ES7 source behind it
+
+``` javascript
+export const hello = async (event, context) => {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: `Go Serverless v1.0! ${(await message({ time: 1, copy: 'Your function executed successfully!'}))}`,
+      input: event,
+    }),
+  };
+};
+
+const message = ({ time, ...rest }) => new Promise((resolve, reject) =>
+  setTimeout(() => {
+    resolve(`${rest.copy} (with a delay)`);
+  }, time * 1000)
+);
 ```
 
 ### Usage
